@@ -40,9 +40,9 @@ import datetime
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-api_id = '20667404'
-api_hash = '40ebfc9a27a71080970737d56004033a'
-client = TelegramClient('paadieaahp', api_id, api_hash)
+api_id = '28499234'
+api_hash = '38788141e6344875b10d3b39937ec5fe'
+client = TelegramClient('lootstacker', api_id, api_hash)
 
 
 
