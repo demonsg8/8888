@@ -557,7 +557,7 @@ async def join_channel(event):
 # Define a dictionary to hold information about ongoing conversations with users
 ongoing_conversations = {}
 
-API_KEY = '4c7b3f7399d04c8f8169952c82c420a6'  # Replace with your actual API key
+API_KEY = 'a407c5a0edd2b150853cffcc6237952'  # Replace with your actual API key
 BASE_URL = "https://api.tgdev.io/tgscan/v1"
 MAX_MESSAGE_LENGTH = 4000  # Maximum character limit for a Telegram message
 
