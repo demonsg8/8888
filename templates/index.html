@@ -1,22 +1,32 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Bot Config Panel</title>
 </head>
 <body>
-    <h1>Bot Configuration</h1>
+    <h1>Bot Configuration Panel</h1>
     <form action="/update" method="post">
+
         <label>Log Channel ID:</label><br>
         <input type="text" name="log_channel" value="{{ config.log_channel }}"><br><br>
 
         <label>Whitelisted User IDs (comma separated):</label><br>
         <input type="text" name="whitelist" value="{{ config.whitelist_str }}"><br><br>
 
-        <label>Specific Users to Log (comma separated):</label><br>
+        <label>Specific User Logs (comma separated):</label><br>
         <input type="text" name="specific_user_logs" value="{{ config.specific_user_logs_str }}"><br><br>
 
-        <input type="submit" value="Save">
+        <label>User Log Channels (one per line, format: user_id:channel_id):</label><br>
+        <textarea name="user_log_channels" rows="5" cols="50">{{ config.user_log_channels_str }}</textarea><br><br>
+
+        <h2>Feature Toggles</h2>
+        <label><input type="checkbox" name="bot_enabled" {% if config.bot_enabled %}checked{% endif %}> Bot Enabled</label><br>
+        <label><input type="checkbox" name="forward_metadata" {% if config.forward_metadata %}checked{% endif %}> Forward Metadata</label><br><br>
+
+        <label>Enabled Commands (comma separated):</label><br>
+        <input type="text" name="enabled_commands" value="{{ config.enabled_commands_str }}"><br><br>
+
+        <input type="submit" value="Save Changes">
     </form>
 </body>
 </html>
