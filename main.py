@@ -36,10 +36,10 @@ from collections import Counter
 import aiohttp
 import datetime
 
-# Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Telegram API credentials
 api_id = '28499234'
 api_hash = '38788141e6344875b10d3b39937ec5fe'
 client = TelegramClient('lootstacker', api_id, api_hash)
@@ -50,13 +50,22 @@ CONFIG_FILE = 'config.json'
 default_config = {
     "log_channel": -1002611788106,
     "specific_user_logs": [],
-    "whitelist": [6018548705, 6672038435, 5972356225]
+    "whitelist": [6018548705, 6672038435, 5972356225],
+    "USER_LOG_CHANNELS": {
+        "6018548705": -1002570801078
+    },
+    "TOGGLES": {
+        "bot_enabled": True,
+        "forward_metadata": True,
+        "enabled_commands": ["/help", "/dox", "/count", "/snus"]
+    }
 }
 
+# Ensure config file exists and load it
 def load_config():
     if not os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'w') as f:
-            json.dump(default_config, f)
+            json.dump(default_config, f, indent=4)
     with open(CONFIG_FILE, 'r') as f:
         return json.load(f)
 
@@ -64,11 +73,16 @@ def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f, indent=4)
 
+# Load config and extract values
 config = load_config()
-
-
-config = load_config()
-WHITE_LIST = config["whitelist"]  
+WHITE_LIST = config.get("whitelist", [])
+GROUP_ID = int(config.get("log_channel", -1001234567890))
+USER_LOG_CHANNELS = {int(uid): int(gid) for uid, gid in config.get("USER_LOG_CHANNELS", {}).items()}
+TOGGLES = config.get("TOGGLES", {
+    "bot_enabled": True,
+    "forward_metadata": True,
+    "enabled_commands": []
+})
 
 def filter_sensitive_information(message_text):
     keywords = ["stevo", "kush", "email", "phone", "name", "ssn", "💯", "sinister", "credit card", "threatsec", "tlo", "ddos", "com", "bfc", "717", "weep", "smith", "name", "yuri", "steven", "jews", "kike","groom", "weed", "coke", "meth", "shrooms", "mushrooms", "i am", "I am", "years", "year old", "snuff", "vile", "KT" "new gen", "admin", "simswap", "up2nogood", "Up2NoGood", "sim",  "telegram", "cupcake", "swap", "wayne", "rabid", "@elder", "@doxinglegend", "@hateful", "newfag", "fullz", "newgen", "nigger", "bot", "og", "dox", "doxbin", "based", "opsec", "schizo", "swat", "nft", "fed", "porn", "masturbate", "jerk off", "paedo", "mimi", "eva14" "eva 14", "poor", "emi", "skid", "xav", "esex", "extort", "rape", "cp", "spam", "warned", "/ban", "john", "John Smith", "vz", "Daddy", "cunny", "esex", "dick", "pussy", "cock", "penis", "cunt", "rapist", "doxbin", "Max", "764", "Matt", 'Nikita', 'fraud', 'att', 'at&t', 'tmo', "hodl", 'swap', 'stalkers','pedo']  # add keywords to filter sensitive information
@@ -91,83 +105,66 @@ pool_of_messages = [
 
 @client.on(events.NewMessage)
 async def handle_messages(event):
+    if not TOGGLES.get("bot_enabled", True):  # Check if bot is enabled
+        return
+
     message = event.message
-    message_text = message.text
-    message_entities = message.entities
     user = await event.get_sender()
     user_id = user.id
-    username = user.username
-    if username:  # Check if username exists
-        username = "@" + username  # Prepend "@" if username exists
-    first_name = user.first_name
-    last_name = user.last_name
+    username = f"@{user.username}" if user.username else "None"
+    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+    message_text = message.text or ""
     timestamp = message.date
-    chat_label = None
-    chat_name = None
-    if isinstance(event.message.peer_id, types.PeerUser):  # If the message is a direct message
-        chat_label = "Direct Message From:"
-        chat_name = f"{first_name} {last_name}"
-    else:  # If the message is in a channel or group chat
-        chat_label = "Chat Title:"
-        chat_name = event.chat.title if event.chat else None
-    message_link = f"https://t.me/c/{abs(event.chat_id) % 10000000000}/{message.id}"
+    chat_title = event.chat.title if event.chat else "Private Chat"
 
-
-    
-    # Extract message entities as a list of strings
+    # Extract message entities (like mentions, hashtags, etc.)
     entities_list = []
-    if message_entities:
-        for entity in message_entities:
+    if message.entities:
+        for entity in message.entities:
             entity_text = message.text[entity.offset: entity.offset + entity.length]
             entities_list.append(f"{entity.__class__.__name__}: {entity_text}")
 
-
     entities_info = ", ".join(entities_list) if entities_list else "No entities"
-    info = f"{chat_label} {chat_name}\n"  # This line now comes first
-    info += f"User ID: #id{user_id}\n"
-    info += f"Username: {username}\n"
-    info += f"First Name: {first_name}\n"
-    info += f"Last Name: {last_name}\n"
-    info += f"Timestamp: {timestamp}\n"
-    info += f"Message: {message_text}\n"
-    info += f"Message Link: {message_link}\n"
-    info += f"Message Entities: {entities_info}\n"
-    # If the message is a direct message
-    if isinstance(event.message.peer_id, types.PeerUser):
-        await client.send_message(GROUP_ID, info)
-        if message.media:  # If the message has media attached
-            await client.forward_messages(GROUP_ID, message)
-    
 
-    # Forward messages from specific users to the destination users and send information about the messages
-    if user_id:
-        await client.forward_messages(GROUP_ID, message)
-        info = f"===EVILBOT MESSAGE FLAGGED===\n"
-        info += f"{chat_label} {chat_name}\n"  # Changed here
-        info += f"User ID: #id{user_id}\n"
-        info += f"Username: {username}\n"
-        info += f"First Name: {first_name}\n"
-        info += f"Last Name: {last_name}\n"
-        info += f"Timestamp: {timestamp}\n"
-        info += f"Message: {message_text}\n"
-        info += f"Message Link: {message_link}\n"
-        info += f"Message Entities: {entities_info}\n"
+    # Generate message link
+    message_link = f"https://t.me/c/{abs(event.chat_id) % 10000000000}/{message.id}"
 
-        await client.send_message(GROUP_ID, info)
+    # Forward message to the main log channel
+    await client.forward_messages(GROUP_ID, message)
+
+    # Forward to user's specific log channel if configured
+    if user_id in USER_LOG_CHANNELS:
+        await client.forward_messages(USER_LOG_CHANNELS[user_id], message)
+
+    # Send metadata if enabled
+    if TOGGLES.get("forward_metadata", True):
+        metadata = (
+            f"📩 Message Metadata\n"
+            f"User ID: #id{user_id}\n"
+            f"Username: {username}\n"
+            f"Name: {full_name}\n"
+            f"Chat: {chat_title}\n"
+            f"Timestamp: {timestamp}\n"
+            f"Message: {message_text}\n"
+            f"Message Link: {message_link}\n"
+            f"Message Entities: {entities_info}"
+        )
+        await client.send_message(GROUP_ID, metadata)
+        if user_id in USER_LOG_CHANNELS:
+            await client.send_message(USER_LOG_CHANNELS[user_id], metadata)
 
     # Check for sensitive information in messages from all users
     if filter_sensitive_information(message_text):
-        info = f"Flagged key word message:\n"
-        info += f"{chat_label} {chat_name}\n"  # Changed here
+        info = f"⚠️ Flagged Key Word Message:\n"
         info += f"User ID: #id{user_id}\n"
         info += f"Username: {username}\n"
-        info += f"First Name: {first_name}\n"
-        info += f"Last Name: {last_name}\n"
+        info += f"Name: {full_name}\n"
+        info += f"Chat: {chat_title}\n"
         info += f"Timestamp: {timestamp}\n"
         info += f"Message: {message_text}\n"
         info += f"Message Link: {message_link}\n"
         info += f"Message Entities: {entities_info}\n"
-
+        
         logger.info(f"Flagged message: {info}")
 
         # Forward the flagged message to the destination users
@@ -177,9 +174,7 @@ async def handle_messages(event):
         await client.send_message(GROUP_ID, info)
 
     else:
-        logger.info(f"Non-flagged message: User ID: {user_id}, Username: {username}, First Name: {first_name}, Last Name: {last_name}, Timestamp: {timestamp}, Message: {message_text}, Message Entities: {entities_info}")
-
-leave_counter = {}  # This line was added
+        logger.info(f"Non-flagged message: User ID: {user_id}, Username: {username}, Name: {full_name}, Timestamp: {timestamp}, Message: {message_text}, Message Entities: {entities_info}")
 
 
 # This function updates the set of group members
