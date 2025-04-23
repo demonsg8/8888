@@ -373,40 +373,6 @@ async def mutual_groups(event):
         await event.reply(f"An error occurred: {str(e)}")
 
 
-joined_chats = set()  # Blacklist to keep track of chats that have been joined
-
-@client.on(events.NewMessage)
-async def log_invite_links(event):
-    global joined_chats
-    if event.out:
-        return
-
-    for entity, text in event.message.get_entities_text():
-        if isinstance(entity, types.MessageEntityTextUrl):
-            url = entity.url
-            # Check if URL matches any of the desired patterns and is not in the blacklist
-            if (url.startswith("t.me/joinchat/") or url.startswith("https://t.me/+") or "t.me/" in url) and url not in joined_chats:
-                sender = await event.get_sender()
-                try:
-                    await client(JoinChannelRequest(url))
-                    join_status = "Joined"
-                    joined_chats.add(url)  # Add the URL to the blacklist after successful join
-                except Exception as e:
-                    join_status = f"Failed To Join: {str(e)}"
-
-                info = f"Invite Link Detected:\n"
-                info += f"Chat Title: {event.chat.title}\n"
-                info += f"Status: {join_status}\n"
-                info += f"User ID: #id{sender.id}\n"
-                info += f"Username: @{sender.username}\n"
-                info += f"First Name: {sender.first_name}\n"
-                info += f"Last Name: {sender.last_name or 'None'}\n"
-                info += f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S%z')}\n"
-                info += f"Message: {url}\n"
-                info += f"Message Link: {event.message.to_id}\n"
-                info += f"Message Entities: {event.message.entities}\n"
-
-                await client.send_message(GROUP_ID, info)
 
 
 
