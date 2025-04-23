@@ -15,14 +15,23 @@ def save_config(data):
 @app.route('/')
 def index():
     config = load_config()
+
+    # Preprocess the whitelist and specific_user_logs into strings
+    config['whitelist_str'] = ','.join(map(str, config['whitelist']))
+    config['specific_user_logs_str'] = ','.join(map(str, config['specific_user_logs']))
+
     return render_template('index.html', config=config)
 
 @app.route('/update', methods=['POST'])
 def update():
     config = load_config()
+    
     config['log_channel'] = int(request.form['log_channel'])
-    config['whitelist'] = list(map(int, request.form.getlist('whitelist')))
-    config['specific_user_logs'] = list(map(int, request.form.getlist('specific_user_logs')))
+    
+    # Process the form data to create lists of integers
+    config['whitelist'] = list(map(int, request.form['whitelist'].split(','))) if request.form['whitelist'] else []
+    config['specific_user_logs'] = list(map(int, request.form['specific_user_logs'].split(','))) if request.form['specific_user_logs'] else []
+
     save_config(config)
     return redirect('/')
 
