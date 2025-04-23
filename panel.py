@@ -7,15 +7,25 @@ CONFIG_FILE = 'config.json'
 
 # Default config in case the file doesn't exist
 default_config = {
-    "log_channel": -1002611788106,
-    "specific_user_logs": [],
-    "whitelist": [],
-    "USER_LOG_CHANNELS": {},
+    "USER_LOG_CHANNELS": {
+        "6018548705": -1002570801078,
+        "6672038435": -1002500000000
+    },
     "TOGGLES": {
-        "bot_enabled": True,
-        "forward_metadata": True,
-        "enabled_commands": []
-    }
+        "bot_enabled": true,
+        "forward_metadata": true,
+        "enabled_commands": ["/help", "/dox", "/count", "/mutualgroups"]
+    },
+    "log_channel": -1001234567890,
+    "specific_user_logs": [],
+    "whitelist": [
+        7989761934,
+        6018548705,
+        6672038435,
+        5972356225,
+        6568673568,
+        7721086392
+    ]
 }
 
 def load_config():
