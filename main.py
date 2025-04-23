@@ -44,7 +44,31 @@ api_id = '28499234'
 api_hash = '38788141e6344875b10d3b39937ec5fe'
 client = TelegramClient('lootstacker', api_id, api_hash)
 
+CONFIG_FILE = 'config.json'
 
+# Default config structure
+default_config = {
+    "log_channel": -1002611788106,
+    "specific_user_logs": [],
+    "whitelist": [6018548705, 6672038435, 5972356225]
+}
+
+def load_config():
+    if not os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(default_config, f)
+    with open(CONFIG_FILE, 'r') as f:
+        return json.load(f)
+
+def save_config(config):
+    with open(CONFIG_FILE, 'w') as f:
+        json.dump(config, f, indent=4)
+
+config = load_config()
+
+
+config = load_config()
+WHITE_LIST = config["whitelist"]  
 
 def filter_sensitive_information(message_text):
     keywords = ["stevo", "kush", "email", "phone", "name", "ssn", "💯", "sinister", "credit card", "threatsec", "tlo", "ddos", "com", "bfc", "717", "weep", "smith", "name", "yuri", "steven", "jews", "kike","groom", "weed", "coke", "meth", "shrooms", "mushrooms", "i am", "I am", "years", "year old", "snuff", "vile", "KT" "new gen", "admin", "simswap", "up2nogood", "Up2NoGood", "sim",  "telegram", "cupcake", "swap", "wayne", "rabid", "@elder", "@doxinglegend", "@hateful", "newfag", "fullz", "newgen", "nigger", "bot", "og", "dox", "doxbin", "based", "opsec", "schizo", "swat", "nft", "fed", "porn", "masturbate", "jerk off", "paedo", "mimi", "eva14" "eva 14", "poor", "emi", "skid", "xav", "esex", "extort", "rape", "cp", "spam", "warned", "/ban", "john", "John Smith", "vz", "Daddy", "cunny", "esex", "dick", "pussy", "cock", "penis", "cunt", "rapist", "doxbin", "Max", "764", "Matt", 'Nikita', 'fraud', 'att', 'at&t', 'tmo', "hodl", 'swap', 'stalkers','pedo']  # add keywords to filter sensitive information
@@ -249,8 +273,6 @@ Timestamp: {event.date.strftime("%Y-%m-%d %H:%M:%S%z")}
         logger.info(message)
         await client.send_message(GROUP_ID, message)
 
-
-WHITE_LIST = [6018548705, 6672038435, 5972356225]   
 
 #	client.on(events.NewMessage(pattern='@client.on(events.NewMessage(pattern=r'(?i).*	tunnel.*'))tunnel'))
 #@client.on(events.NewMessage(pattern=r'(?i)tunnel'))
