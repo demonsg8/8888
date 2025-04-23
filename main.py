@@ -118,7 +118,7 @@ async def handle_messages(event):
     # Forward messages from specific users to the destination users and send information about the messages
     if user_id:
         await client.forward_messages(GROUP_ID, message)
-        info = f"Flagged user message:\n"
+        info = f"===EVILBOT MESSAGE FLAGGED===\n"
         info += f"{chat_label} {chat_name}\n"  # Changed here
         info += f"User ID: #id{user_id}\n"
         info += f"Username: {username}\n"
@@ -252,6 +252,27 @@ Timestamp: {event.date.strftime("%Y-%m-%d %H:%M:%S%z")}
 
 WHITE_LIST = [6018548705, 6672038435, 5972356225]   
 
+#	client.on(events.NewMessage(pattern='@client.on(events.NewMessage(pattern=r'(?i).*	tunnel.*'))tunnel'))
+#@client.on(events.NewMessage(pattern=r'(?i)tunnel'))
+@client.on(events.NewMessage(pattern=r'(?i).*tunnel.*'))
+async def tunnel(event):
+    user_id = event.message.sender_id
+    if user_id:
+        await client.send_file(event.chat_id, 'tunnel.gif', caption='tunnel time.')
+    else:
+        await event.respond('Sorry, you are not allowed to use this command.')
+
+@client.on(events.NewMessage(pattern='/help'))
+async def help(event):
+    user_id = event.message.sender_id
+    if user_id in WHITE_LIST:
+        dialogs = await client.get_dialogs()
+        count = len(dialogs)
+        await event.respond(f'Current commands: /help, /dox, /count, /mutuals, /snus')
+    else:
+        await event.respond('Sorry, you are not allowed to use this command.')
+
+
 @client.on(events.NewMessage(pattern='/snus'))
 async def snus_search(event):
     user_id = event.message.sender_id
@@ -290,6 +311,27 @@ async def snus_search(event):
                     await event.reply(response_message)
             else:
                 await event.reply(f"An error occurred: {resp.status}")
+
+
+
+@client.on(events.NewMessage(pattern='/tunnel'))
+async def tunnel(event):
+    user_id = event.message.sender_id
+    if user_id in WHITE_LIST:
+        await client.send_file(event.chat_id, '~/tunnel.gif', caption='tunnel time.')
+    else:
+        await event.respond('Sorry, you are not allowed to use this command.')
+
+@client.on(events.NewMessage(pattern='/help'))
+async def help(event):
+    user_id = event.message.sender_id
+    if user_id in WHITE_LIST:
+        dialogs = await client.get_dialogs()
+        count = len(dialogs)
+        await event.respond(f'Current commands: /help, /dox, /count, /mutuals, /snus')
+    else:
+        await event.respond('Sorry, you are not allowed to use this command.')
+
 
 @client.on(events.NewMessage(pattern='/mason_foxworth2'))
 async def count_chats(event):
