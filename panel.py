@@ -46,24 +46,39 @@ def index():
 def update():
     config = load_config()
 
+    # Parse and handle the log_channel
     config['log_channel'] = int(request.form['log_channel']) if request.form['log_channel'] else 0
+
+    # Parse whitelist and specific_user_logs
     config['whitelist'] = list(map(int, request.form['whitelist'].split(','))) if request.form['whitelist'] else []
     config['specific_user_logs'] = list(map(int, request.form['specific_user_logs'].split(','))) if request.form['specific_user_logs'] else []
 
+    # Parse and handle the user_log_channels
     raw_map = request.form['user_log_channels'].strip().split('\n')
-    config['USER_LOG_CHANNELS'] = {
-        int(uid.strip()): int(gid.strip())
-        for line in raw_map if ':' in line
-        for uid, gid in [line.split(':')]
-    }
+    config['USER_LOG_CHANNELS'] = {}
 
+    for line in raw_map:
+        if ':' in line:
+            try:
+                uid, gid = line.split(':')
+                # Only add valid pairs to the dictionary
+                if uid.strip() and gid.strip():
+                    config['USER_LOG_CHANNELS'][int(uid.strip())] = int(gid.strip())
+            except ValueError:
+                # If there's an error in conversion, log it or skip the line
+                print(f"Skipping invalid entry: {line}")
+
+    # Update TOGGLES values
     config['TOGGLES'] = {
         'bot_enabled': 'bot_enabled' in request.form,
         'forward_metadata': 'forward_metadata' in request.form,
         'enabled_commands': [cmd.strip() for cmd in request.form['enabled_commands'].split(',') if cmd.strip()]
     }
 
+    # Save the updated config
     save_config(config)
+
+    # Redirect to the main page
     return redirect('/')
 
 if __name__ == '__main__':
