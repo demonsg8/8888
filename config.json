@@ -6,7 +6,8 @@
     "TOGGLES": {
         "bot_enabled": true,
         "forward_metadata": true,
-        "enabled_commands": ["/help", "/dox", "/count", "/mutualgroups"], 
+        "enabled_commands": ["/help", "/dox", "/count", "/mutualgroups"]
+    },
     "log_channel": -1001234567890,
     "specific_user_logs": [],
     "whitelist": [
