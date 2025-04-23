@@ -1,1 +1,22 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bot Config Panel</title>
+</head>
+<body>
+    <h1>Bot Configuration</h1>
+    <form action="/update" method="post">
+        <label>Log Channel ID:</label><br>
+        <input type="text" name="log_channel" value="{{ config.log_channel }}"><br><br>
+
+        <label>Whitelisted User IDs (comma separated):</label><br>
+        <input type="text" name="whitelist" value="{{ config.whitelist_str }}"><br><br>
+
+        <label>Specific Users to Log (comma separated):</label><br>
+        <input type="text" name="specific_user_logs" value="{{ config.specific_user_logs_str }}"><br><br>
+
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html>
